@@ -1,0 +1,5 @@
+
+Flask
+paho-mqtt
+flask_cors
+flask_swagger_ui
