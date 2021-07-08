@@ -2,12 +2,17 @@
 import uuid
 from datetime import datetime, timedelta
 from flask import jsonify, abort, request, Blueprint
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 from flask import redirect, url_for
-from flask import Flask, jsonify
-
+from flask_mqtt import Mqtt
+import json
 
 REQUEST_API = Blueprint('request_api', __name__)
+mqtt = None
+
+
+def send_mqtt(topic, msg):
+    mqtt.publish(topic, json.dumps(msg))
 
 
 def get_blueprint():
@@ -20,14 +25,9 @@ def get_blueprint():
 ##
 MARKET_REQUESTS = {
     "8c36e86c-13b9-4102-a44f-646015dfd981": {
-        'type': 'BID',
-        'message': u'Bid energy',
+        'type': 'INFO',
+        'message': u'Test request',
         'timestamp': (datetime.today() - timedelta(1)).timestamp()
-    },
-    "04cfc704-acb2-40af-a8d3-4611fab54ada": {
-        'type': 'OFFER',
-        'message': u'Offer energy',
-        'timestamp': (datetime.today() - timedelta(2)).timestamp()
     }
 }
 
@@ -58,6 +58,25 @@ def get_record_by_id(_id):
     if _id not in MARKET_REQUESTS:
         abort(404)
     return jsonify(MARKET_REQUESTS[_id])
+
+
+@REQUEST_API.route('/request/submit/<string:_id>', methods=['POST'])
+def submit_record_by_id(_id):
+    """Submit request by it's id
+    @param _id: the id
+    @return: 200: a MARKET_REQUESTS as a flask/response object \
+    with application/json mimetype.
+    @raise 404: if  request not found
+    """
+    if _id not in MARKET_REQUESTS:
+        abort(404)
+        return jsonify(MARKET_REQUESTS[_id])
+    else:
+        record = MARKET_REQUESTS[_id]
+        send_mqtt(record['type'], record)
+        # clear all market requests
+        MARKET_REQUESTS = {}
+        return record
 
 
 @REQUEST_API.route('/request', methods=['POST'])

@@ -6,9 +6,21 @@ from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 from routes import request_api
-
+from flask_mqtt import Mqtt
+import os
+import subprocess
+import time
 
 APP = Flask(__name__)
+### MQTT specific ###
+APP.config['MQTT_BROKER_URL'] = "127.0.0.1"  # 'mybroker.com'
+APP.config['MQTT_BROKER_PORT'] = 1883
+APP.config['MQTT_REFRESH_TIME'] = 10.0  # refresh time in seconds
+process = subprocess.Popen(['/usr/sbin/mosquitto', '-c', '/etc/mosquitto/mosquitto.conf'],
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
+time.sleep(5)
+request_api.mqtt = Mqtt(APP)
 
 ### swagger specific ###
 SWAGGER_URL = '/swagger'
@@ -22,8 +34,6 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
 )
 APP.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 ### end swagger specific ###
-
-
 APP.register_blueprint(request_api.get_blueprint())
 
 
@@ -60,7 +70,7 @@ if __name__ == '__main__':
                         help="Use flask debug/dev mode with file change reloading")
     ARGS = PARSER.parse_args()
 
-    PORT = int(os.environ.get('PORT', 5000))
+    PORT = int(os.environ.get('PORT', 5001))
 
     if ARGS.debug:
         print("Running in debug mode")

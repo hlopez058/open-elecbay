@@ -43,6 +43,28 @@ paths:
             "$ref": "#/components/schemas/id"
         "400":
           description: Failed. Bad post data.
+  "/request/submit/{id}":
+    post:
+      tags:
+        - Market Request
+      summary: Submits the marketRequests
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Market Request id
+          schema:
+            "$ref": "#/components/schemas/id"
+      responses:
+        "200":
+          description: OK
+          schema:
+            "$ref": "#/components/schemas/marketRequest"
+        "400":
+          description: Failed. Misunderstood Request.
+        "404":
+          description: Failed. Market request not found.
+
   "/request/{id}":
     parameters:
       - name: id

@@ -1,16 +1,18 @@
 FROM python:3-alpine
+
+# FLASK SERVER SETUUP
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
-RUN apk add --no-cache mosquitto
-RUN apk add --no-cache mosquitto-clients
 COPY requirements.txt /usr/src/app/
 RUN pip3 install --no-cache-dir -r requirements.txt
-COPY ./app /usr/src/app
-RUN /usr/sbin/mosquitto
-EXPOSE 5000
-CMD ["flask", "run"]
+COPY . /usr/src/app
 
-#ENTRYPOINT ["python3"]
-#CMD ["-m","app.py"]
+# MQTT BROKER SETUP
+RUN apk add --no-cache mosquitto
+RUN apk add --no-cache mosquitto-clients
+RUN apk add curl
+
+EXPOSE 5001 1883
+CMD ["flask", "run","-p","5001"]

@@ -38,7 +38,6 @@ The MQTT broker is then serviced by an market agent that supervises the bidding,
 A different market agent can be designed to independelty manage each of these periods.
 
 A particpant can then register through the API and then stream requests to the MQTT broker for any of the periods
-
 Particpants can publish/subscribe requests based on a participant ID/key provided by the API after registration
 
 

@@ -1,7 +1,116 @@
-version: "3.9"
+version: '3.2'
+
 services:
-  web:
-    build: .
+  app:
+    build:
+      context: app/
+    volumes:
+      - type: bind
+        source: ./app/routes/
+        target: /usr/src/app/routes/
+      - type: bind
+        source: ./app/static/
+        target: /usr/src/app/static/
+      - type: bind
+        source: ./app/templates/
+        target: /usr/src/app/templates/
+      - type: bind
+        source: ./app/broker/
+        target: /usr/src/app/broker/
+      - type: bind
+        source: ./app/mosquitto/config/mosquitto.conf
+        target: /etc/mosquitto/mosquitto.conf
     ports:
-      - "5000:5000"
-      
+      - "5001:5001"
+      - "1883:1883"
+    networks:
+      - elk
+
+
+  elasticsearch:
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: "7.13.2"
+    volumes:
+      - type: bind
+        source: ./elasticsearch/config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+      - type: volume
+        source: elasticsearch
+        target: /usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ELASTIC_PASSWORD: changeme
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: single-node
+    networks:
+      - elk
+
+  logstash:
+    build:
+      context: logstash/
+      args:
+        ELK_VERSION: "7.13.2"
+    volumes:
+      - type: bind
+        source: ./logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+      - type: bind
+        source: ./logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: kibana/
+      args:
+        ELK_VERSION: "7.13.2"
+    volumes:
+      - type: bind
+        source: ./kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    build: 
+      context: filebeat/
+    volumes:
+      - type: bind
+        source: ./filebeat/config/filebeat.yml
+        target: /usr/share/filebeat/filebeat.yml
+        read_only: true
+    command: filebeat -e -strict.perms=false
+    networks:
+      - elk
+    depends_on:
+      - logstash
+    
+networks:
+  elk:
+    driver: bridge
+volumes:
+  elasticsearch:
