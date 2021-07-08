@@ -17,15 +17,23 @@ services:
       - type: bind
         source: ./app/broker/
         target: /usr/src/app/broker/
-      - type: bind
-        source: ./app/mosquitto/config/mosquitto.conf
-        target: /etc/mosquitto/mosquitto.conf
     ports:
       - "5001:5001"
       - "1883:1883"
     networks:
       - elk
-
+  
+  broker:
+    build:
+      context: broker/
+    volumes:
+      - type: bind
+        source: ./broker/mosquitto/config/mosquitto.conf
+        target: /etc/mosquitto/mosquitto.conf
+    ports:
+      - "1883:1883"
+    networks:
+      - elk
 
   elasticsearch:
     build:
