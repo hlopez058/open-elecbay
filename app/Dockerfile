@@ -9,10 +9,5 @@ COPY requirements.txt /usr/src/app/
 RUN pip3 install --no-cache-dir -r requirements.txt
 COPY . /usr/src/app
 
-# MQTT BROKER SETUP
-RUN apk add --no-cache mosquitto
-RUN apk add --no-cache mosquitto-clients
-RUN apk add curl
-
-EXPOSE 5001 1883
+EXPOSE 5001
 CMD ["flask", "run","-p","5001"]

@@ -6,7 +6,7 @@ output.elasticsearch:
 filebeat.inputs:
   - type: mqtt
     hosts:
-      - app:1883
+      - mosquitto:1883
     topics:
       - INFO
       - BID
