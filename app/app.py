@@ -13,7 +13,7 @@ import time
 
 APP = Flask(__name__)
 ### MQTT specific ###
-APP.config['MQTT_BROKER_URL'] = "broker"  # 'mybroker.com'
+APP.config['MQTT_BROKER_URL'] = "mosquitto"  # 'mybroker.com'
 APP.config['MQTT_BROKER_PORT'] = 1883
 APP.config['MQTT_REFRESH_TIME'] = 10.0  # refresh time in seconds
 request_api.mqtt = Mqtt(APP)
