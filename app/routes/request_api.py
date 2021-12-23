@@ -11,6 +11,18 @@ REQUEST_API = Blueprint('request_api', __name__)
 mqtt = None
 
 
+# Example market requests
+# Should be managed as a queue by a brokerage thread
+##
+MARKET_REQUESTS = {}
+#    "8c36e86c-13b9-4102-a44f-646015dfd981": {
+#        'type': 'INFO',
+#        'message': u'Test request',
+#        'timestamp': (datetime.today() - timedelta(1)).timestamp()
+#    }
+# }
+
+
 def send_mqtt(topic, msg):
     mqtt.publish(topic, json.dumps(msg))
 
@@ -18,18 +30,6 @@ def send_mqtt(topic, msg):
 def get_blueprint():
     """Return the blueprint for the main app module"""
     return REQUEST_API
-
-
-# Example market requests
-# Should be managed as a queue by a brokerage thread
-##
-MARKET_REQUESTS = {
-    "8c36e86c-13b9-4102-a44f-646015dfd981": {
-        'type': 'INFO',
-        'message': u'Test request',
-        'timestamp': (datetime.today() - timedelta(1)).timestamp()
-    }
-}
 
 
 @REQUEST_API.route("/", methods=['GET'])
@@ -60,7 +60,7 @@ def get_record_by_id(_id):
     return jsonify(MARKET_REQUESTS[_id])
 
 
-@REQUEST_API.route('/request/submit/<string:_id>', methods=['POST'])
+@REQUEST_API.route('/submit/<string:_id>', methods=['POST'])
 def submit_record_by_id(_id):
     """Submit request by it's id
     @param _id: the id
@@ -75,7 +75,7 @@ def submit_record_by_id(_id):
         record = MARKET_REQUESTS[_id]
         send_mqtt(record['type'], record)
         # clear all market requests
-        MARKET_REQUESTS = {}
+        del MARKET_REQUESTS[_id]
         return record
 
 
@@ -111,7 +111,7 @@ def edit_record(_id):
     """Edit a request record
     @param type: post : the request type , BID,OFFER,INFO
     @param message: post : the details of the request
-    @return: 200: a booke_request as a flask/response object \
+    @return: 200: a request as a flask/response object \
     with application/json mimetype.
     @raise 400: misunderstood request
     """

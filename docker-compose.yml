@@ -19,6 +19,12 @@ services:
     networks:
       - elk
   
+  core:
+    build:
+      context: core/
+    networks:
+      - elk
+
   mosquitto:
     build:
       context: mosquitto/

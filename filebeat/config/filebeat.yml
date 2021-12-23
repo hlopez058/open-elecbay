@@ -9,22 +9,24 @@ filebeat.inputs:
       - mosquitto:1883
     topics:
       - INFO
-      - BID
-      -
-      - OFFER
+      - open-elecbay/info
     tags: ["json"]
     enabled: true
     fields:
       event.dataset: market-data
       event.module: filebeat-mqtt
     pipeline: filebeat-mqtt-pipeline
-    index: "%{[agent.name]}-mqtt-%{+yyyy.MM.dd}"
-#Set this as the pipeline inside elk
-#[
-#  {
-#    "json": {
-#      "field": "message",
-#      "add_to_root": true
-#    }
-#  }
-#]
+    index: "%{[agent.name]}-mqtt-messages-%{+yyyy.MM.dd}"
+  - type: mqtt
+    hosts:
+      - mosquitto:1883
+    topics:
+      - METRICS
+      - open-elecbay/metrics
+    tags: ["json"]
+    enabled: true
+    fields:
+      event.dataset: market-data
+      event.module: filebeat-mqtt
+    pipeline: filebeat-mqtt-pipeline
+    index: "%{[agent.name]}-mqtt-metrics-%{+yyyy.MM.dd}"

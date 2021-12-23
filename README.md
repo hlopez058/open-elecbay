@@ -32,13 +32,13 @@ docker run -dp 5000:5000 open-elecbay
 
 ## Usage
 
-Environment loads mosquitto MQTT broker locally on the docker app. 
-Messages are recieved through the frontend API , and forwarded to the MQTT broker.
-The MQTT broker is then serviced by an market agent that supervises the bidding, exchange, and settlement periods
-A different market agent can be designed to independelty manage each of these periods.
+Environment loads mosquito MQTT broker locally on the docker app. 
+Messages are received through the frontend API , and forwarded to the MQTT broker.
+The MQTT broker is then serviced by a market agent that supervises the bidding, exchange, and settlement periods
+A different market agent can be designed to independently manage each of these periods.
 
-A particpant can then register through the API and then stream requests to the MQTT broker for any of the periods
-Particpants can publish/subscribe requests based on a participant ID/key provided by the API after registration
+A participant can then register through the API and then stream requests to the MQTT broker for any of the periods
+Participants can publish/subscribe requests based on a participant ID/key provided by the API after registration
 
 
 
@@ -102,7 +102,54 @@ should elecbay just coordinate? with its own internal timer?
 build a publish topic so buyers can browse available items to purchase?
 
 
-A market is created with different 
+# How it works
+
+The appcontainer needs to spin up in order to host the broker.
+
+1. Create a request to the market using the /request endpoint
+2. Recieved an ID from the created request then submit it to the market
+3. 
+
+
+I need to post requests simpler so that i can place the broker/agent logic
+
+
+# Get Started
+
+1. Navigate to the API on http://localhost:5001/swagger/ 
+2. Request a new market request
+
+## Mosquito MQTT Broker
+The Mosquito MQTT Broker is a free open source MQTT Broker that runs on the local machine.
+The container for the MQTT Broker is called 'mosquitto'. Logs from the container are shown below after startup of the broker.
+
+```
+1636720700: mosquitto version 2.0.11 starting
+1636720700: Config loaded from /etc/mosquitto/mosquitto.conf.
+1636720700: Opening ipv4 listen socket on port 1883.
+1636720700: Opening ipv6 listen socket on port 1883.
+```
+
+Connection from the agent to the broker is shown below.
+```
+1636720700: mosquitto version 2.0.11 running
+1636720700: New connection from 172.18.0.3:58175 on port 1883.
+1636720700: New client connected from 172.18.0.3:58175 as agent1 (p2, c1, k60).
+1636720701: New connection from 172.18.0.4:35695 on port 1883.
+1636720701: New client connected from 172.18.0.4:35695 as auto-CD05CD69-A62C-3E65-EE15-353D83E4C6B2 (p2, 1636728801: Client agent1 closed its connection.
+1636729219: New connection from 172.18.0.3:55207 on port 1883.
+1636729219: New client connected from 172.18.0.3:55207 as agent1 (p2, c1, k60).
+1636729393: New connection from 172.18.0.3:36777 on port 1883.
+1636729393: Client agent1 already connected, closing old connection.
+1636729393: New client connected from 172.18.0.3:36777 as agent1 (p2, c1, k60).
+1636729484: Client agent1 has exceeded timeout, disconnecting.
+```
+
+Connection from filebeat to the broker is shown below.
+```
+1636720702: New connection from 172.18.0.8:56420 on port 1883.
+1636720702: New client connected from 172.18.0.8:56420 as filebeat (p2, c1, k30).
+```
 
 
 

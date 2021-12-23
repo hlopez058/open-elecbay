@@ -43,7 +43,7 @@ paths:
             "$ref": "#/components/schemas/id"
         "400":
           description: Failed. Bad post data.
-  "/request/submit/{id}":
+  "/submit/{id}":
     post:
       tags:
         - Market Request
